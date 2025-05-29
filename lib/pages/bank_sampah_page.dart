@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import '../models/bank_sampah.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class BankSampahPage extends StatefulWidget {
   final String? searchQuery;
@@ -13,27 +15,45 @@ class BankSampahPage extends StatefulWidget {
 class _BankSampahPageState extends State<BankSampahPage> {
   final List<BankSampah> bankSampahList = [
     BankSampah(
-      nama: 'Bank Sampah Sukolilo',
-      alamat: 'Jl. Sukolilo No. 15, Surabaya, Jawa Timur',
-      jarakKm: 1.2,
+      nama: 'Bank Sampah Induk Surabaya',
+      alamat:
+          'Jl. Raya Menur No.31-A, Manyar Sabrangan, Kec. Mulyorejo, Surabaya, Jawa Timur',
+      latitude: -7.277911093294131,
+      longitude: 112.76407826964619,
       imageUrl: 'assets/images/bank_sampah1.jpg',
+      mapsUrl: 'https://maps.app.goo.gl/AUWzL8uq2sAXGj8u8',
     ),
     BankSampah(
-      nama: 'Bank Sampah Semolowaru',
-      alamat: 'Jl. Semolowaru No. 55, Surabaya, Jawa Timur',
-      jarakKm: 2.5,
+      nama: 'Bank Sampah Margorejo Mandiri',
+      alamat:
+          'Jl. Margorejo III G No.34, Margorejo, Kec. Wonocolo, Surabaya, Jawa Timur',
+      latitude: -7.311012328685286,
+      longitude: 112.74154159335161,
       imageUrl: 'assets/images/bank_sampah2.jpg',
+      mapsUrl: 'https://maps.app.goo.gl/49UKdiFBDxXZCQsJ8',
+    ),
+    BankSampah(
+      nama: 'Bank Sampah Manyar Mandiri',
+      alamat:
+          'Jl. Manyar Sabrangan IX B Gg. Makam, Manyar Sabrangan, Kec. Mulyorejo, Surabaya, Jawa Timur',
+      latitude: -7.281551833465722,
+      longitude: 112.77251362219201,
+      imageUrl: 'assets/images/bank_sampah3.jpg',
+      mapsUrl: 'https://maps.app.goo.gl/49UKdiFBDxXZCQsJ8',
     ),
   ];
 
   late String searchQuery;
   late TextEditingController _controller;
+  Position? _userPosition;
+  bool _locationPermissionDenied = false;
 
   @override
   void initState() {
     super.initState();
     searchQuery = widget.searchQuery ?? '';
     _controller = TextEditingController(text: searchQuery);
+    _determinePosition();
   }
 
   @override
@@ -42,13 +62,84 @@ class _BankSampahPageState extends State<BankSampahPage> {
     super.dispose();
   }
 
+  Future<void> _determinePosition() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      setState(() => _locationPermissionDenied = true);
+      return;
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        setState(() => _locationPermissionDenied = true);
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      setState(() => _locationPermissionDenied = true);
+      return;
+    }
+
+    Position position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+    setState(() {
+      _userPosition = position;
+      _locationPermissionDenied = false;
+    });
+  }
+
+  double? _calculateDistance(BankSampah bank) {
+    if (_userPosition == null) return null;
+    final distanceMeters = Geolocator.distanceBetween(
+      _userPosition!.latitude,
+      _userPosition!.longitude,
+      bank.latitude,
+      bank.longitude,
+    );
+    return distanceMeters / 1000;
+  }
+
+  Future<void> _launchMaps(String url) async {
+    if (!await launchUrl(
+      Uri.parse(url),
+      mode: LaunchMode.externalApplication,
+    )) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Gagal membuka Google Maps')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final filteredList = bankSampahList
+    final List<BankSampah> filteredList = bankSampahList
         .where(
           (bank) => bank.nama.toLowerCase().contains(searchQuery.toLowerCase()),
         )
         .toList();
+
+    // Urutkan berdasarkan jarak jika lokasi tersedia
+    if (_userPosition != null) {
+      filteredList.sort((a, b) {
+        final jarakA = Geolocator.distanceBetween(
+          _userPosition!.latitude,
+          _userPosition!.longitude,
+          a.latitude,
+          a.longitude,
+        );
+        final jarakB = Geolocator.distanceBetween(
+          _userPosition!.latitude,
+          _userPosition!.longitude,
+          b.latitude,
+          b.longitude,
+        );
+        return jarakA.compareTo(jarakB);
+      });
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -71,9 +162,7 @@ class _BankSampahPageState extends State<BankSampahPage> {
         actions: [
           IconButton(
             icon: Icon(Icons.menu, color: Colors.black87),
-            onPressed: () {
-              // TODO: Open menu drawer or other actions
-            },
+            onPressed: () {},
           ),
         ],
       ),
@@ -82,7 +171,7 @@ class _BankSampahPageState extends State<BankSampahPage> {
           padding: EdgeInsets.all(16),
           child: Column(
             children: [
-              // Search bar
+              // Search Bar
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
@@ -97,17 +186,18 @@ class _BankSampahPageState extends State<BankSampahPage> {
                     border: InputBorder.none,
                     icon: Icon(Icons.search),
                   ),
-                  onChanged: (val) {
-                    setState(() {
-                      searchQuery = val;
-                    });
-                  },
+                  onChanged: (val) => setState(() => searchQuery = val),
                 ),
               ),
-
               SizedBox(height: 12),
 
-              // List bank sampah
+              if (_locationPermissionDenied)
+                Text(
+                  'Izin lokasi ditolak, jarak tidak bisa ditampilkan.',
+                  style: TextStyle(color: Colors.red),
+                ),
+
+              // List
               Expanded(
                 child: filteredList.isEmpty
                     ? Center(child: Text('Bank Sampah tidak ditemukan'))
@@ -115,6 +205,8 @@ class _BankSampahPageState extends State<BankSampahPage> {
                         itemCount: filteredList.length,
                         itemBuilder: (context, index) {
                           final bank = filteredList[index];
+                          final distanceKm = _calculateDistance(bank);
+
                           return Card(
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -146,7 +238,9 @@ class _BankSampahPageState extends State<BankSampahPage> {
                                   Text(bank.alamat),
                                   SizedBox(height: 4),
                                   Text(
-                                    '${bank.jarakKm.toStringAsFixed(1)} KM dari kamu',
+                                    distanceKm != null
+                                        ? '${distanceKm.toStringAsFixed(1)} KM dari kamu'
+                                        : 'Menghitung jarak...',
                                     style: TextStyle(
                                       color: Colors.grey[600],
                                       fontSize: 12,
@@ -156,15 +250,12 @@ class _BankSampahPageState extends State<BankSampahPage> {
                                   ElevatedButton.icon(
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.green[700],
-                                      foregroundColor: Colors
-                                          .white, // ini supaya teks & ikon putih
+                                      foregroundColor: Colors.white,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                     ),
-                                    onPressed: () {
-                                      // TODO: buka maps lokasi bank sampah
-                                    },
+                                    onPressed: () => _launchMaps(bank.mapsUrl),
                                     icon: Icon(Icons.location_on_outlined),
                                     label: Text('Lihat Maps Lokasi'),
                                   ),
