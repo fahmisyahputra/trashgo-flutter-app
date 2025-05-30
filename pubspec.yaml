@@ -104,10 +104,10 @@ flutter:
   #         weight: 700
 
   assets:
+    - assets/images/logo.png
     - assets/images/banner_recycle.png
     - assets/images/bank_sampah1.jpg
     - assets/images/bank_sampah2.jpg
     - assets/images/bank_sampah3.jpg
-    - assets/images/edukasi1.jpg
-    - assets/images/edukasi2.jpg
+
     

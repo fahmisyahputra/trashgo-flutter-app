@@ -3,8 +3,27 @@ import 'package:provider/provider.dart';
 import '../models/pickup_request.dart';
 import '../pickup_request_provider.dart';
 import 'package:intl/intl.dart';
+import '../widgets/appbar_navbar.dart';
 
-class RiwayatPickupPage extends StatelessWidget {
+class RiwayatPickupPage extends StatefulWidget {
+  @override
+  State<RiwayatPickupPage> createState() => _RiwayatPickupPageState();
+}
+
+class _RiwayatPickupPageState extends State<RiwayatPickupPage> {
+  late List<PickupRequest> _filteredRiwayat;
+  String _searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    final allRiwayat = Provider.of<PickupRequestProvider>(
+      context,
+      listen: false,
+    ).requests;
+    _filteredRiwayat = allRiwayat;
+  }
+
   Color statusColor(StatusPickup status) {
     switch (status) {
       case StatusPickup.MenungguKonfirmasi:
@@ -31,129 +50,48 @@ class RiwayatPickupPage extends StatelessWidget {
     }
   }
 
+  void _handleSearch(String query, List<PickupRequest> allRiwayat) {
+    setState(() {
+      _searchQuery = query;
+      _filteredRiwayat = allRiwayat.where((item) {
+        final data = [
+          item.namaLengkap.toLowerCase(),
+          item.alamatPickup.toLowerCase(),
+          item.jenisSampah.toLowerCase(),
+        ];
+        return data.any((field) => field.contains(query.toLowerCase()));
+      }).toList();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final dateFormatter = DateFormat('d MMMM yyyy, HH:mm', 'id_ID');
     final pickupProvider = Provider.of<PickupRequestProvider>(context);
-    final riwayat = pickupProvider.requests;
+    final allRiwayat = pickupProvider.requests;
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Row(
-          children: [
-            Icon(Icons.delete_outline, color: Colors.green[700]),
-            SizedBox(width: 8),
-            Text(
-              'TrashGo',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.green[700],
-                fontSize: 22,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.menu, color: Colors.black87),
-            onPressed: () {
-              // TODO: menu action
-            },
-          ),
-        ],
-      ),
+      appBar: TrashGoAppBar(), // Ganti dengan reusable AppBar
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.all(16),
           child: Column(
             children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Riwayat Pickup Kamu...',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              // Judul
+              Padding(
+                padding: const EdgeInsets.only(bottom: 24),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Riwayat Pickup Kamu...',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
                 ),
               ),
-              SizedBox(height: 12),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: riwayat.length,
-                  itemBuilder: (context, index) {
-                    final item = riwayat[index];
-                    return Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      margin: EdgeInsets.only(bottom: 12),
-                      child: Padding(
-                        padding: EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              dateFormatter.format(item.tanggal),
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
-                            ),
-                            Text(item.namaLengkap),
-                            Text(item.alamatPickup),
-                            Text('Jenis Sampah: ${item.jenisSampah}'),
-                            Text('Berat: ${item.beratSampah} kg'),
-                            SizedBox(height: 8),
-                            Container(
-                              decoration: BoxDecoration(
-                                color: statusColor(item.status),
-                                borderRadius: BorderRadius.circular(24),
-                              ),
-                              padding: EdgeInsets.symmetric(
-                                vertical: 8,
-                                horizontal: 16,
-                              ),
-                              child: Text(
-                                statusText(item.status),
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            // Contoh tombol update status, hanya untuk demo
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                PopupMenuButton<StatusPickup>(
-                                  onSelected: (newStatus) {
-                                    pickupProvider.updateStatus(index, newStatus);
-                                  },
-                                  itemBuilder: (context) => [
-                                    PopupMenuItem(
-                                      value: StatusPickup.MenungguKonfirmasi,
-                                      child: Text('Menunggu Konfirmasi'),
-                                    ),
-                                    PopupMenuItem(
-                                      value: StatusPickup.SedangDiproses,
-                                      child: Text('Sedang Diproses'),
-                                    ),
-                                    PopupMenuItem(
-                                      value: StatusPickup.Selesai,
-                                      child: Text('Selesai'),
-                                    ),
-                                  ],
-                                  child: Icon(Icons.more_vert),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              SizedBox(height: 12),
+
+              // Search Bar
               Container(
+                margin: EdgeInsets.only(bottom: 20),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: Colors.grey.shade300),
@@ -166,10 +104,64 @@ class RiwayatPickupPage extends StatelessWidget {
                     border: InputBorder.none,
                     icon: Icon(Icons.search),
                   ),
-                  onChanged: (val) {
-                    // TODO: Implement search filtering
-                  },
+                  onChanged: (val) => _handleSearch(val, allRiwayat),
                 ),
+              ),
+
+              // List Riwayat
+              Expanded(
+                child: _filteredRiwayat.isEmpty
+                    ? Center(child: Text('Tidak ada riwayat ditemukan.'))
+                    : ListView.builder(
+                        itemCount: _filteredRiwayat.length,
+                        itemBuilder: (context, index) {
+                          final item = _filteredRiwayat[index];
+                          return Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            margin: EdgeInsets.only(bottom: 14),
+                            child: Padding(
+                              padding: EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    dateFormatter.format(item.tanggal),
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  SizedBox(height: 10),
+                                  Text(item.namaLengkap),
+                                  SizedBox(height: 10),
+                                  Text(item.alamatPickup),
+                                  SizedBox(height: 10),
+                                  Text('Jenis Sampah: ${item.jenisSampah}'),
+                                  SizedBox(height: 10),
+                                  Text('Berat: ${item.beratSampah} kg'),
+                                  SizedBox(height: 12),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: statusColor(item.status),
+                                      borderRadius: BorderRadius.circular(24),
+                                    ),
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: 8,
+                                      horizontal: 16,
+                                    ),
+                                    child: Text(
+                                      statusText(item.status),
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
               ),
             ],
           ),

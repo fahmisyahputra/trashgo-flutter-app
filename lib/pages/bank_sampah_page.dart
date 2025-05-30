@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import '../models/bank_sampah.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../models/bank_sampah.dart';
+import '../widgets/appbar_navbar.dart'; // pastikan path sesuai struktur proyekmu
 
 class BankSampahPage extends StatefulWidget {
   final String? searchQuery;
@@ -108,21 +110,19 @@ class _BankSampahPageState extends State<BankSampahPage> {
       Uri.parse(url),
       mode: LaunchMode.externalApplication,
     )) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Gagal membuka Google Maps')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal membuka Google Maps')),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final List<BankSampah> filteredList = bankSampahList
-        .where(
-          (bank) => bank.nama.toLowerCase().contains(searchQuery.toLowerCase()),
-        )
+        .where((bank) =>
+            bank.nama.toLowerCase().contains(searchQuery.toLowerCase()))
         .toList();
 
-    // Urutkan berdasarkan jarak jika lokasi tersedia
     if (_userPosition != null) {
       filteredList.sort((a, b) {
         final jarakA = Geolocator.distanceBetween(
@@ -142,36 +142,12 @@ class _BankSampahPageState extends State<BankSampahPage> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.green[700],
-        elevation: 0,
-        title: Row(
-          children: [
-            Icon(Icons.delete_outline, color: Colors.green[700]),
-            SizedBox(width: 8),
-            Text(
-              'TrashGo',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.green[700],
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.menu, color: Colors.black87),
-            onPressed: () {},
-          ),
-        ],
-      ),
+      appBar: TrashGoAppBar(), // GANTI INI
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.all(16),
           child: Column(
             children: [
-              // Search Bar
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
@@ -190,14 +166,11 @@ class _BankSampahPageState extends State<BankSampahPage> {
                 ),
               ),
               SizedBox(height: 12),
-
               if (_locationPermissionDenied)
                 Text(
                   'Izin lokasi ditolak, jarak tidak bisa ditampilkan.',
                   style: TextStyle(color: Colors.red),
                 ),
-
-              // List
               Expanded(
                 child: filteredList.isEmpty
                     ? Center(child: Text('Bank Sampah tidak ditemukan'))
