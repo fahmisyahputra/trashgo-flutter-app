@@ -109,5 +109,6 @@ flutter:
     - assets/images/bank_sampah1.jpg
     - assets/images/bank_sampah2.jpg
     - assets/images/bank_sampah3.jpg
+    - lib/assets/trashgo.png
 
     
