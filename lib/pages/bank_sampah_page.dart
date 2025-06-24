@@ -3,7 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../models/bank_sampah.dart';
-import '../widgets/appbar_navbar.dart'; // pastikan path sesuai struktur proyekmu
+import '../widgets/appbar_navbar.dart'; 
 
 class BankSampahPage extends StatefulWidget {
   final String? searchQuery;
@@ -42,6 +42,69 @@ class _BankSampahPageState extends State<BankSampahPage> {
       longitude: 112.77251362219201,
       imageUrl: 'assets/images/bank_sampah3.jpg',
       mapsUrl: 'https://maps.app.goo.gl/49UKdiFBDxXZCQsJ8',
+    ),
+    BankSampah(
+      nama: 'Bank Sampah Bintang Mangrove',
+      alamat:
+          'Kawasan Mangrove, Gununganyar tambak gg. 3, Kec. Gn. Anyar, Surabaya, Jawa Timur',
+      latitude: -7.340818271848959,
+      longitude: 112.8344713299799,
+      imageUrl: 'assets/images/bank_sampah4.jpg',
+      mapsUrl: 'https://maps.app.goo.gl/a1KeeeEMqTivNdtq7',
+    ),
+    BankSampah(
+      nama: 'Bank Sampah Seruni',
+      alamat:
+          'Jl. Bulak Cumpat Barat No.I, Bulak, Kec. Bulak, Surabaya, Jawa Timur',
+      latitude: -7.230882287764537,
+      longitude: 112.77529491802794,
+      imageUrl: 'assets/images/bank_sampah5.jpg',
+      mapsUrl: 'https://maps.app.goo.gl/yYriLh7DLc3JZv4N6',
+    ),
+    BankSampah(
+      nama: 'Bank Sampah Masidosi 6',
+      alamat:
+          'Jl. Medokan Semampir No.17, RT.003/RW.03, Medokan Semampir, Kec. Sukolilo, Surabaya, Jawa Timur',
+      latitude: -7.304070253175935,
+      longitude: 112.80010612363789,
+      imageUrl: 'assets/images/bank_sampah6.jpg',
+      mapsUrl: 'https://maps.app.goo.gl/8cK6Geekw1UsPznQA',
+    ),
+    BankSampah(
+      nama: 'Bank Sampah Srikandi Keputih',
+      alamat:
+          'Jl. Keputih Tegal Timur Baru II, Keputih, Kec. Sukolilo, Surabaya, Jawa Timur',
+      latitude: -7.297408884255659,
+      longitude: 112.8102731213677,
+      imageUrl: 'assets/images/bank_sampah7.jpg',
+      mapsUrl: 'https://maps.app.goo.gl/rdE1bw4U8QM2iyjM7',
+    ),
+    BankSampah(
+      nama: 'Bank Sampah SAMAS',
+      alamat:
+          'Jl. Pandegiling No.312, Wonorejo, Kec. Tegalsari, Surabaya, Jawa Timur',
+      latitude: -7.272493354028919,
+      longitude: 112.73141171014493,
+      imageUrl: 'assets/images/bank_sampah8.jpg',
+      mapsUrl: 'https://maps.app.goo.gl/vPgRY8xC4GFoX5rR7',
+    ),
+    BankSampah(
+      nama: 'Bank Sampah Teratai',
+      alamat:
+          'Jl. Rungkut Asri Barat IV No.14, Rungkut Kidul, Kec. Rungkut, Surabaya, Jawa Timur',
+      latitude: -7.326338838679739,
+      longitude: 112.77669718611409,
+      imageUrl: 'assets/images/bank_sampah9.jpg',
+      mapsUrl: 'https://maps.app.goo.gl/4g2iKP97vKnDzkEg9',
+    ),
+    BankSampah(
+      nama: 'Bank Sampah Jatilondo',
+      alamat:
+          'Jl. Jatisrono IV No.12, RT.003/RW.14, Ujung, Kec. Semampir, Surabaya, Jawa Timur',
+      latitude: -7.217365892180368,
+      longitude: 112.75484015824541,
+      imageUrl: 'assets/images/bank_sampah10.jpg',
+      mapsUrl: 'https://maps.app.goo.gl/drywMLYcsD4uF7hm7',
     ),
   ];
 
