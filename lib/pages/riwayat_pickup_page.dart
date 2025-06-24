@@ -51,15 +51,20 @@ class _RiwayatPickupPageState extends State<RiwayatPickupPage> {
   }
 
   void _handleSearch(String query, List<PickupRequest> allRiwayat) {
+    final dateFormatter = DateFormat('d MMMM yyyy, HH:mm', 'id_ID');
+
     setState(() {
-      _searchQuery = query;
+      _searchQuery = query.toLowerCase();
+
       _filteredRiwayat = allRiwayat.where((item) {
-        final data = [
+        final formattedDate = dateFormatter.format(item.tanggal).toLowerCase();
+        final fields = [
           item.namaLengkap.toLowerCase(),
           item.alamatPickup.toLowerCase(),
           item.jenisSampah.toLowerCase(),
+          formattedDate,
         ];
-        return data.any((field) => field.contains(query.toLowerCase()));
+        return fields.any((field) => field.contains(_searchQuery));
       }).toList();
     });
   }
@@ -71,7 +76,7 @@ class _RiwayatPickupPageState extends State<RiwayatPickupPage> {
     final allRiwayat = pickupProvider.requests;
 
     return Scaffold(
-      appBar: TrashGoAppBar(), // Ganti dengan reusable AppBar
+      appBar: TrashGoAppBar(), 
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.all(16),

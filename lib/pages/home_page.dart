@@ -17,7 +17,7 @@ class _HomePageWrapperState extends State<HomePageWrapper> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [
-    _homeContent(), // tidak pakai Scaffold
+    _homeContent(), 
     BankSampahPage(),
     RequestPickupPage(),
     RiwayatPickupPage(),
@@ -33,7 +33,7 @@ class _HomePageWrapperState extends State<HomePageWrapper> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _selectedIndex == 0 ? TrashGoAppBar() : null, // ✅ tampilkan appbar hanya di halaman Home
+      appBar: _selectedIndex == 0 ? TrashGoAppBar() : null, 
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavbar(
         currentIndex: _selectedIndex,
