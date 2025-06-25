@@ -15,6 +15,9 @@ class _RegisterPageState extends State<RegisterPage> {
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
 
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
+
   void _handleRegister() {
     if (_formKey.currentState!.validate()) {
       final email = _emailController.text.trim();
@@ -86,48 +89,79 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(height: 16),
 
                 // Password
+                 // Password
                 TextFormField(
                   controller: _passwordController,
-                  obscureText: true,
+                  obscureText: _obscurePassword, // 🔄 CHANGE
                   style: const TextStyle(fontSize: 16),
                   decoration: InputDecoration(
                     labelText: "Password",
-                    labelStyle: TextStyle(color: Colors.grey[700]),
                     prefixIcon: Icon(Icons.lock, color: Colors.grey[700]),
+                    suffixIcon: IconButton( // 🔄 CHANGE
+                      icon: Icon(
+                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                        color: Colors.grey[700],
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                    ),
                     focusedBorder: UnderlineInputBorder(
-                      borderSide:
-                          BorderSide(color: Colors.green.shade800, width: 2),
+                      borderSide: BorderSide(
+                        color: Colors.green.shade800,
+                        width: 2,
+                      ),
                     ),
                     enabledBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.grey.shade300),
                     ),
                   ),
-                  validator: (value) => value == null || value.length < 6
-                      ? "Minimal 6 karakter"
-                      : null,
+                  validator: (value) =>
+                      value == null || value.isEmpty ? 'Password wajib diisi' : null,
                 ),
                 const SizedBox(height: 16),
 
                 // Konfirmasi Password
                 TextFormField(
                   controller: _confirmController,
-                  obscureText: true,
+                  obscureText: _obscureConfirmPassword, // 🔄 CHANGE
                   style: const TextStyle(fontSize: 16),
                   decoration: InputDecoration(
                     labelText: "Konfirmasi Password",
-                    labelStyle: TextStyle(color: Colors.grey[700]),
                     prefixIcon: Icon(Icons.lock_outline, color: Colors.grey[700]),
+                    suffixIcon: IconButton( // 🔄 CHANGE
+                      icon: Icon(
+                        _obscureConfirmPassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                        color: Colors.grey[700],
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscureConfirmPassword = !_obscureConfirmPassword;
+                        });
+                      },
+                    ),
                     focusedBorder: UnderlineInputBorder(
-                      borderSide:
-                          BorderSide(color: Colors.green.shade800, width: 2),
+                      borderSide: BorderSide(
+                        color: Colors.green.shade800,
+                        width: 2,
+                      ),
                     ),
                     enabledBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.grey.shade300),
                     ),
                   ),
-                  validator: (value) => value != _passwordController.text
-                      ? "Password tidak cocok"
-                      : null,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Konfirmasi password wajib diisi';
+                    } else if (value != _passwordController.text) {
+                      return 'Password tidak cocok';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 32),
 

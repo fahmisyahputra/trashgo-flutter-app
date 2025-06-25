@@ -17,6 +17,8 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
+  bool _obscurePassword = true;
+
   @override
   Widget build(BuildContext context) {
     final auth = Provider.of<AuthProvider>(context);
@@ -71,12 +73,23 @@ class _LoginPageState extends State<LoginPage> {
                 // Password
                 TextFormField(
                   controller: _passwordController,
-                  obscureText: true,
-                  style: TextStyle(fontSize: 16),
+                  obscureText: _obscurePassword,
+                  style: const TextStyle(fontSize: 16),
                   decoration: InputDecoration(
                     labelText: "Password",
                     labelStyle: TextStyle(color: Colors.grey[700]),
                     prefixIcon: Icon(Icons.lock, color: Colors.grey[700]),
+                    suffixIcon: IconButton( 
+                      icon: Icon(
+                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                        color: Colors.grey[700],
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                    ),
                     focusedBorder: UnderlineInputBorder(
                       borderSide: BorderSide(
                         color: Colors.green.shade800,
@@ -87,12 +100,10 @@ class _LoginPageState extends State<LoginPage> {
                       borderSide: BorderSide(color: Colors.grey.shade300),
                     ),
                   ),
-                  validator: (value) => value == null || value.isEmpty
-                      ? 'Password wajib diisi'
-                      : null,
+                  validator: (value) =>
+                      value == null || value.isEmpty ? 'Password wajib diisi' : null,
                 ),
                 const SizedBox(height: 32),
-
 
                 ElevatedButton.icon(
                   onPressed: () {
