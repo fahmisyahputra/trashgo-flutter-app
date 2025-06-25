@@ -41,70 +41,97 @@ class TrashGoAppBar extends StatelessWidget implements PreferredSizeWidget {
       actions: [
         IconButton(
           icon: const Icon(Icons.menu, color: Colors.black87),
-          onPressed: () => _showBottomMenu(context, auth),
+          onPressed: () => showRightSideMenu(context, auth),
         ),
       ],
     );
   }
 
-  void _showBottomMenu(BuildContext context, AuthProvider auth) {
-    showModalBottomSheet(
+  void showRightSideMenu(BuildContext context, AuthProvider auth) {
+    showGeneralDialog(
       context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _menuItem(
-              icon: Icons.home,
-              label: 'Beranda',
-              onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomePageWrapper())),
+      barrierLabel: "Menu",
+      barrierDismissible: true,
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (_, __, ___) => Align(
+        alignment: Alignment.centerRight,
+        child: Material(
+          color: Colors.white,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(16),
+            bottomLeft: Radius.circular(16),
+          ),
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.75,
+            height: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
+            child: SafeArea(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  menuItem(
+                    icon: Icons.home,
+                    label: 'Beranda',
+                    onTap: () => navigate(context, const HomePageWrapper()),
+                  ),
+                  menuItem(
+                    icon: Icons.location_on,
+                    label: 'Bank Sampah',
+                    onTap: () => navigate(context, BankSampahPage()),
+                  ),
+                  menuItem(
+                    icon: Icons.recycling,
+                    label: 'Request Pickup',
+                    onTap: () => navigate(context, RequestPickupPage()),
+                  ),
+                  menuItem(
+                    icon: Icons.history,
+                    label: 'Riwayat Pickup',
+                    onTap: () => navigate(context, RiwayatPickupPage()),
+                  ),
+                  menuItem(
+                    icon: Icons.menu_book,
+                    label: 'Edukasi Sampah',
+                    onTap: () => navigate(context, EdukasiSampahPage()),
+                  ),
+                  const Divider(),
+                  menuItem(
+                    icon: auth.isLoggedIn ? Icons.logout : Icons.login,
+                    label: auth.isLoggedIn ? 'Logout' : 'Login',
+                    onTap: () {
+                      Navigator.pop(context);
+                      if (auth.isLoggedIn) {
+                        auth.logout();
+                        navigate(context, const HomePageWrapper());
+                      } else {
+                        navigate(context, const LoginPage());
+                      }
+                    },
+                  ),
+                ],
+              ),
             ),
-            _menuItem(
-              icon: Icons.location_on,
-              label: 'Bank Sampah',
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => BankSampahPage())),
-            ),
-            _menuItem(
-              icon: Icons.recycling,
-              label: 'Request Pickup',
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => RequestPickupPage())),
-            ),
-            _menuItem(
-              icon: Icons.history,
-              label: 'Riwayat Pickup',
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => RiwayatPickupPage())),
-            ),
-            _menuItem(
-              icon: Icons.menu_book,
-              label: 'Edukasi Sampah',
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => EdukasiSampahPage())),
-            ),
-            const Divider(),
-            _menuItem(
-              icon: auth.isLoggedIn ? Icons.logout : Icons.login,
-              label: auth.isLoggedIn ? 'Logout' : 'Login',
-              onTap: () {
-                Navigator.pop(context);
-                if (auth.isLoggedIn) {
-                  auth.logout();
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomePageWrapper()));
-                } else {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginPage()));
-                }
-              },
-            ),
-          ],
+          ),
         ),
       ),
+      transitionBuilder: (_, animation, __, child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(1, 0),
+            end: Offset.zero,
+          ).animate(animation),
+          child: child,
+        );
+      },
     );
   }
 
-  Widget _menuItem({required IconData icon, required String label, required VoidCallback onTap}) {
+  void navigate(BuildContext context, Widget page) {
+    Navigator.pop(context); // Tutup menu dulu
+    Navigator.push(context, MaterialPageRoute(builder: (_) => page));
+  }
+
+  Widget menuItem({required IconData icon, required String label, required VoidCallback onTap}) {
     return ListTile(
       leading: Icon(icon, color: Colors.green[700]),
       title: Text(label, style: const TextStyle(fontSize: 16)),
